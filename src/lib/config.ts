@@ -1,9 +1,16 @@
-import { fs } from '@tauri-apps/api'
-import { appConfigDir } from '@tauri-apps/api/path'
+import { dialog, fs } from '@tauri-apps/api'
+import { appConfigDir, resourceDir } from '@tauri-apps/api/path'
 
 async function check() {
-    console.log(await appConfigDir())
-    console.log(await fs.exists(await appConfigDir()))
+    const confDir = await appConfigDir()
+    if (!(await fs.exists(confDir))) fs.createDir(confDir)
+    console.log(confDir)
+}
+
+export function addcsengő() {
+    dialog.open({
+        title: 'Csengő hozzáadása',
+    })
 }
 
 check()
