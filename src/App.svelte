@@ -1,5 +1,5 @@
 <script lang="ts">
-import {fs} from "@tauri-apps/api"
+import "./lib/config"
 </script>
 
 <div>
