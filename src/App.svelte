@@ -1,4 +1,5 @@
     <script lang="ts">
+        import * as conf from "./lib/config"
         let popUp: HTMLDivElement
         let bg:HTMLDivElement
 
