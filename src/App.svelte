@@ -5,6 +5,29 @@
     let timeDiv: HTMLDivElement
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
+    let timeBtns: HTMLDivElement[] = []
+    let napok = {
+        Hétfő: 'hé',
+        Kedd: 'ke',
+        Szerda: 'sze',
+        Csütörtök: 'csü',
+        Péntek: 'pé',
+        Szombat: 'szo',
+        Vasárnap: 'va',
+    }
+    let hangok = [
+        {
+            location: 'C:\\Jan\\ki.mp3',
+            dates: ['8:35', '7:40'],
+            days: ['hétfő', 'kedd'],
+        },
+        {
+            location: 'C:\\Jan\\be.mp3',
+            dates: ['8:30', '7:60'],
+            days: ['szombat', 'kedd'],
+        },
+    ]
+
     let index = 1
     function creating() {
         // conf.addcsengő()
@@ -17,6 +40,10 @@
         popUp?.classList.add('hidden')
         popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
+        for (let i = 0; i < timeBtns.length; i++) {
+            const element = timeBtns[i]
+            element.remove()
+        }
     }
 
     function plusTime() {
@@ -38,9 +65,11 @@
         newTime.classList.remove('size-0')
         newTime.name = `time_${index}`
         newTime.id = `time_${index}`
-        console.log(newTime)
+        timeBtns.push(newTime)
         timeDiv.insertBefore(newTime, timeBtn)
     }
+    let test = document.getElementById('time_1')
+    console.log(test, 'test')
 </script>
 
 <div>
@@ -52,19 +81,37 @@
         >
             +
         </button>
+        <div>
+            {#each hangok as hang}
+                <div
+                    class="grid grid-cols-3 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
+                >
+                    <span
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-300 mx-3"
+                        >{hang.location}</span
+                    >
+                    <span
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-200 mx-3"
+                        >{hang.dates}</span
+                    >
+                    <span
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-300 mx-3"
+                        >{hang.days}</span
+                    >
+                </div>
+            {/each}
+        </div>
     </div>
 
     <div
-        class=" hidden opacity-80 items-center justify-center h-screen w-screen m-auto"
+        class=" hidden items-center justify-center h-screen w-screen m-auto z-10 fixed top-0"
         bind:this={popUp}
     >
         <div
             class="z-10 bg-slate-700 w-5/6 h-auto relative rounded-2xl min-h-[420px]"
         >
-            <div class="grid grid-cols-2 grid-rows-1 content-start">
-                <div
-                    class="bg-blue-950 absolute top-2 left-2 px-3 rounded-xl py-2 w-96"
-                >
+            <div class="grid grid-cols-2 grid-rows-1 content-start my-2 mx-2">
+                <div class="bg-blue-950 top-2 px-3 rounded-xl py-2 w-96">
                     <div
                         class="text-center content-center grid"
                         bind:this={timeDiv}
@@ -99,26 +146,27 @@
                         >
                             Nap(ok)
                         </span>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
+                        {#each Object.keys(napok) as nap}
+                            <div
+                                class="flex gap-2 bg-blue-700 rounded-xl my-2 group"
+                            >
                                 <input
                                     type="checkbox"
-                                    name="H"
-                                    id="H"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
+                                    name={napok[nap]}
+                                    class=" translate-x-36 check group-active:chk peer cursor-pointer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
                                 />
-                                <label for="H" class="text-2xl text-white"
-                                    >Hétfő</label
-                                >
+                                <label
+                                    for="H"
+                                    class="text-2xl text-white translate-x-36"
+                                    >{nap}
+                                </label>
                                 <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
+                                    class=" translate-x-36 absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="2"
+                                    stroke-width="3"
                                     stroke-Linecap="round"
                                     stroke-Linejoin="round"
                                 >
@@ -126,175 +174,7 @@
                                     ></polyline>
                                 </svg>
                             </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="K"
-                                    id="K"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="K" class="text-2xl text-white"
-                                    >Kedd</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="SZE"
-                                    id="SZE"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="SZE" class="text-2xl text-white"
-                                    >Szerda</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="CS"
-                                    id="CS"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="CS" class="text-2xl text-white"
-                                    >Csütörtök</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="P"
-                                    id="P"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="P" class="text-2xl text-white"
-                                    >Péntek</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="SZO"
-                                    id="SZO"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="SZO" class="text-2xl text-white"
-                                    >Szoyat</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-blue-700 rounded-xl content-center items-center text-center justify-center grid my-2"
-                        >
-                            <div class="flex gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="V"
-                                    id="V"
-                                    class="peer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label for="V" class="text-2xl text-white"
-                                    >Vasárnap</label
-                                >
-                                <svg
-                                    class="absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        </div>
+                        {/each}
                     </div>
                 </div>
             </div>
