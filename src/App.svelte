@@ -6,7 +6,16 @@
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
     let timeBtns: HTMLDivElement[] = []
-    let napok = {
+    interface napokInter {
+        Hétfő: String
+        Kedd: String
+        Szerda: String
+        Csütörtök: String
+        Péntek: String
+        Szombat: String
+        Vasárnap: String
+    }
+    let napok: napokInter = {
         Hétfő: 'hé',
         Kedd: 'ke',
         Szerda: 'sze',
@@ -19,12 +28,14 @@
         {
             location: 'C:\\Jan\\ki.mp3',
             dates: ['8:35', '7:40'],
-            days: ['hétfő', 'kedd'],
+            days: ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek'],
+            mode: true,
         },
         {
             location: 'C:\\Jan\\be.mp3',
-            dates: ['8:30', '7:60'],
-            days: ['szombat', 'kedd'],
+            dates: ['8:30', '7:40'],
+            days: ['Szombat', 'Kedd'],
+            mode: true,
         },
     ]
 
@@ -45,7 +56,58 @@
             element.remove()
         }
     }
-
+    function checkDaysIfContanius(days: string[], mode: boolean) {
+        let output: string[] = []
+        if (mode) {
+            let TwoWeekDays = []
+            for (let index = 0; index < Object.keys(napok).length; index++) {
+                const element = Object.keys(napok)[index]
+                TwoWeekDays.push(element)
+            }
+            for (let index = 0; index < Object.keys(napok).length; index++) {
+                const element = Object.keys(napok)[index]
+                TwoWeekDays.push(element)
+            }
+            let included = true
+            for (let i = 0; i < days.length; i++) {
+                const day = days[i]
+                let zeroPint = 0
+                if (TwoWeekDays.includes(days[0]))
+                    zeroPint = TwoWeekDays.indexOf(days[0])
+                if (i !== TwoWeekDays.indexOf(day)) included = false
+            }
+            if (included) output = [`${days[0]}-${days[days.length - 1]}`]
+            else {
+                return days
+            }
+        } else {
+            let TwoWeekDaysId = []
+            for (let index = 0; index < Object.keys(napok).length; index++) {
+                const element = Object.keys(napok)[index]
+                TwoWeekDaysId.push(element)
+            }
+            for (let index = 0; index < Object.keys(napok).length; index++) {
+                const element = Object.keys(napok)[index]
+                TwoWeekDaysId.push(element)
+            }
+            let included = true
+            for (let i = 0; i < days.length; i++) {
+                const day = days[i]
+                let zeroPint = 0
+                if (TwoWeekDaysId.includes(days[0]))
+                    zeroPint = TwoWeekDaysId.indexOf(days[0])
+                if (i !== TwoWeekDaysId.indexOf(day)) included = false
+            }
+            if (included)
+                output = [
+                    `${napok[days[0] as keyof typeof napok]}-${napok[days[days.length - 1] as keyof typeof napok]}`,
+                ]
+            else {
+                return days
+            }
+        }
+        return output
+    }
     function plusTime() {
         index++
         console.log('még jó')
@@ -68,11 +130,26 @@
         timeBtns.push(newTime)
         timeDiv.insertBefore(newTime, timeBtn)
     }
-    let test = document.getElementById('time_1')
-    console.log(test, 'test')
+    function modeChanged(index: number) {
+        const btn = document.getElementById(`${index}_mode`)
+        if (hangok[index].mode) {
+            btn?.classList.add('bg-red-600')
+            btn?.classList.remove('bg-green-600')
+            hangok[index].mode = false
+        } else {
+            hangok[index].mode = true
+            btn?.classList.remove('bg-red-600')
+            btn?.classList.add('bg-green-600')
+        }
+
+        return null
+    }
+    for (let i = 0; i < hangok.length; i++) {
+        hangok[i].days = checkDaysIfContanius(hangok[i].days, true)
+    }
 </script>
 
-<div>
+<div class="">
     <div bind:this={bg}>
         <button
             id="plus"
@@ -82,29 +159,71 @@
             +
         </button>
         <div>
+            <div
+                class="grid grid-cols-4 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
+            >
+                <span
+                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    >Hang</span
+                >
+                <span
+                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    >Idő</span
+                >
+                <span
+                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    >Nap(ok)</span
+                >
+                <span
+                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    >Szerkesztés</span
+                >
+            </div>
             {#each hangok as hang}
                 <div
-                    class="grid grid-cols-3 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
+                    class="grid grid-cols-4 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
                 >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-300 mx-3"
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
                         >{hang.location}</span
                     >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-200 mx-3"
-                        >{hang.dates}</span
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
+                        >{#each hang.dates as idő}
+                            {idő}
+                        {/each}</span
                     >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-gray-300 mx-3"
-                        >{hang.days}</span
+                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
+                        >{#each hang.days as nap}
+                            {nap}
+                        {/each}</span
                     >
+                    <div
+                        class="items-center content-center justify-center text-center grid grid-cols-6 gap-2"
+                    >
+                        <button
+                            class="col-span-2 p-1 text-3xl text-gray-900 text font-bold text-center rounded-xl bg-red-600 mx-2 outline outline-black hover:bg-red-900"
+                            id={`${hangok.indexOf(hang)}_del`}>Törlés</button
+                        >
+                        <button
+                            class="col-span-3 p-1 text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 outline outline-black hover:bg-blue-800"
+                            id={`${hangok.indexOf(hang)}_edit`}
+                            >Szerkeszt.</button
+                        >
+                        <button
+                            class="outline h-[46px] bg-green-600 outline-white rounded-xl"
+                            id={`${hangok.indexOf(hang)}_mode`}
+                            on:click={modeChanged(hangok.indexOf(hang))}
+                        ></button>
+                    </div>
                 </div>
             {/each}
         </div>
     </div>
 
     <div
-        class=" hidden items-center justify-center h-screen w-screen m-auto z-10 fixed top-0"
+        class=" hidden items-center justify-center h-screen w-screen m-auto z-10 fixed top-0 overflow-auto"
         bind:this={popUp}
     >
         <div
