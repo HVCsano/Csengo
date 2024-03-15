@@ -62,9 +62,11 @@
             class="z-10 bg-slate-700 w-5/6 h-auto relative rounded-2xl min-h-[420px]"
         >
             <div class="grid grid-cols-2 grid-rows-1 content-start">
-                <div>
+                <div
+                    class="bg-blue-950 absolute top-2 left-2 px-3 rounded-xl py-2 w-96"
+                >
                     <div
-                        class="text-center content-center grid bg-blue-950 absolute top-2 left-2 px-3 rounded-xl py-2 w-96 overflow-y-auto"
+                        class="text-center content-center grid"
                         bind:this={timeDiv}
                     >
                         <span
@@ -86,7 +88,7 @@
                     </div>
                 </div>
                 <div
-                    class="bg-blue-950 absolute top-2 right-32 w-96 px-3 py-2 rounded-xl"
+                    class="bg-blue-950 absolute top-2 right-40 w-96 px-3 py-2 rounded-xl"
                 >
                     <div
                         class="text-center content-center grid"
