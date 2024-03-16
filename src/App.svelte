@@ -1,19 +1,20 @@
 <script lang="ts">
     import * as conf from './lib/config'
+
     let popUp: HTMLDivElement
     let bg: HTMLDivElement
     let timeDiv: HTMLDivElement
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
-    let timeBtns: HTMLDivElement[] = []
+
     interface napokInter {
-        Hétfő: String
-        Kedd: String
-        Szerda: String
-        Csütörtök: String
-        Péntek: String
-        Szombat: String
-        Vasárnap: String
+        Hétfő: string
+        Kedd: string
+        Szerda: string
+        Csütörtök: string
+        Péntek: string
+        Szombat: string
+        Vasárnap: string
     }
     let napok: napokInter = {
         Hétfő: 'hé',
@@ -24,17 +25,55 @@
         Szombat: 'szo',
         Vasárnap: 'va',
     }
+    let days = [
+        {
+            day: 'Hétfő',
+            name: 'hé',
+        },
+        {
+            day: 'Kedd',
+            name: 'ke',
+        },
+        {
+            day: 'Szerda',
+            name: 'sze',
+        },
+        {
+            day: 'Csütörtök',
+            name: 'csü',
+        },
+        {
+            day: 'Péntek',
+            name: 'pé',
+        },
+        {
+            day: 'Szombat',
+            name: 'szo',
+        },
+        {
+            day: 'Vasárnap',
+            name: 'va',
+        },
+    ]
+    let timeBtnsJson = [
+        {
+            name: `time_1`,
+            id: `time_1`,
+            delId: `minus_time_1`,
+        },
+    ]
+
     let hangok = [
         {
             location: 'C:\\Jan\\ki.mp3',
             dates: ['8:35', '7:40'],
-            days: ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
+            days: ['Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
             mode: true,
         },
         {
             location: 'C:\\Jan\\be.mp3',
             dates: ['8:30', '7:40'],
-            days: ['Szombat', 'Péntek', 'Csütörtök'],
+            days: ['Szombat', 'Péntek', 'Csütörtök', 'Vasárnap', 'Hétfő'],
             mode: true,
         },
     ]
@@ -50,10 +89,13 @@
         popUp?.classList.add('hidden')
         popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
-        for (let i = 0; i < timeBtns.length; i++) {
-            const element = timeBtns[i]
-            element.remove()
-        }
+        timeBtnsJson = [
+            {
+                name: `time_1`,
+                id: `time_1`,
+                delId: `minus_time_1`,
+            },
+        ]
     }
     function checkDaysIfContanius(days: string[]) {
         interface outputInter {
@@ -79,7 +121,8 @@
                 let zeroPint = 0
                 if (TwoWeekDays.includes(days[0]))
                     zeroPint = TwoWeekDays.indexOf(days[0])
-                if (i !== TwoWeekDays.indexOf(day)) included = false
+
+                if (i !== TwoWeekDays.indexOf(day) - zeroPint) included = false
             }
             if (included) {
                 output.days = [`${days[0]}-${days[days.length - 1]}`]
@@ -120,24 +163,24 @@
     }
     function plusTime() {
         index++
-        let newTime = document.createElement('input')
-        newTime.type = 'time'
-        newTime.classList.add(
-            'my-2',
-            'text-white',
-            'text-center',
-            'bg-blue-700',
-            'rounded-2xl',
-            'text-2xl',
-            'size-0',
-            'transition-all'
-        )
-        newTime.classList.add('size-100')
-        newTime.classList.remove('size-0')
-        newTime.name = `time_${index}`
-        newTime.id = `time_${index}`
-        timeBtns.push(newTime)
-        timeDiv.insertBefore(newTime, timeBtn)
+
+        let newTime = {
+            name: `time_${index}`,
+            id: `time_${index}`,
+            delId: `minus_time_${index}`,
+        }
+        timeBtnsJson.push(newTime)
+        timeBtnsJson = timeBtnsJson
+    }
+    function minusTime(id: string) {
+        let wanted = timeBtnsJson.find((element) => {
+            return element.id === id
+        })
+        if (wanted) {
+            timeBtnsJson.splice(timeBtnsJson.indexOf(wanted) - 1, 1)
+        }
+
+        timeBtnsJson = timeBtnsJson
     }
     function modeChanged(index: number) {
         const btn = document.getElementById(`${index}_mode`)
@@ -150,8 +193,6 @@
             btn?.classList.remove('bg-red-600')
             btn?.classList.add('bg-green-600')
         }
-
-        return null
     }
     function sortingWeekDays(a: string, b: string) {
         if (Object.keys(napok).indexOf(a) < Object.keys(napok).indexOf(b)) {
@@ -166,7 +207,6 @@
     for (let i = 0; i < hangok.length; i++) {
         hangok[i].days.sort(sortingWeekDays)
     }
-    console.log(hangok[1].days.sort(sortingWeekDays))
 </script>
 
 <div class="">
@@ -240,7 +280,7 @@
                         <button
                             class="outline bg-green-600 outline-white rounded-xl text-3xl text-transparent mx-1"
                             id={`${hangok.indexOf(hang)}_mode`}
-                            on:click={modeChanged(hangok.indexOf(hang))}
+                            on:click={() => modeChanged(hangok.indexOf(hang))}
                             >a
                         </button>
                     </div>
@@ -267,12 +307,22 @@
                         >
                             Idő
                         </span>
-                        <input
-                            type="time"
-                            name="time_1"
-                            Id="time_1"
-                            class=" my-2 text-white text-center bg-blue-700 rounded-2xl text-2xl"
-                        />
+                        {#each timeBtnsJson as newTimeBtnJson}
+                            <div class="grid grid-cols-4 gap-3">
+                                <input
+                                    type="time"
+                                    name={newTimeBtnJson.name}
+                                    id={newTimeBtnJson.id}
+                                    class=" my-2 text-white text-center bg-blue-700 rounded-2xl text-2xl col-span-3"
+                                />
+                                <button
+                                    class=" py-2 px-3 rounded-xl bg-red-700 text-white text-center hover:bg-red-800 my-2"
+                                    on:click={() =>
+                                        minusTime(newTimeBtnJson.id)}
+                                    id={newTimeBtnJson.delId}>-</button
+                                >
+                            </div>
+                        {/each}
                         <button
                             class=" py-3 px-5 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800 my-2"
                             on:click={() => plusTime()}
@@ -292,19 +342,21 @@
                         >
                             Nap(ok)
                         </span>
-                        {#each Object.keys(napok) as nap}
+                        {#each days as day}
                             <div
                                 class="flex gap-2 bg-blue-700 rounded-xl my-2 group"
                             >
                                 <input
                                     type="checkbox"
-                                    name={napok[nap]}
+                                    checked={false}
+                                    name={day.name}
+                                    id={day.name}
                                     class=" translate-x-36 check group-active:chk peer cursor-pointer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
                                 />
                                 <label
                                     for="H"
                                     class="text-2xl text-white translate-x-36"
-                                    >{nap}
+                                    >{day.day}
                                 </label>
                                 <svg
                                     class=" translate-x-36 absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
