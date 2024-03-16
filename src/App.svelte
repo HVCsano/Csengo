@@ -28,13 +28,13 @@
         {
             location: 'C:\\Jan\\ki.mp3',
             dates: ['8:35', '7:40'],
-            days: ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek'],
+            days: ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
             mode: true,
         },
         {
             location: 'C:\\Jan\\be.mp3',
             dates: ['8:30', '7:40'],
-            days: ['Szombat', 'Kedd'],
+            days: ['Szombat', 'Péntek', 'Csütörtök'],
             mode: true,
         },
     ]
@@ -47,7 +47,6 @@
         bg.classList.add('opacity-40')
     }
     function done() {
-        console.log('index', index)
         popUp?.classList.add('hidden')
         popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
@@ -56,8 +55,14 @@
             element.remove()
         }
     }
-    function checkDaysIfContanius(days: string[], mode: boolean) {
-        let output: string[] = []
+    function checkDaysIfContanius(days: string[]) {
+        interface outputInter {
+            days: string[]
+            succes: boolean
+        }
+        let output: outputInter = { days: days, succes: false }
+        let mode = false
+        if (days[0].length > 3) mode = true
         if (mode) {
             let TwoWeekDays = []
             for (let index = 0; index < Object.keys(napok).length; index++) {
@@ -76,9 +81,12 @@
                     zeroPint = TwoWeekDays.indexOf(days[0])
                 if (i !== TwoWeekDays.indexOf(day)) included = false
             }
-            if (included) output = [`${days[0]}-${days[days.length - 1]}`]
-            else {
-                return days
+            if (included) {
+                output.days = [`${days[0]}-${days[days.length - 1]}`]
+                output.succes = true
+            } else {
+                output.succes = false
+                output.days = days
             }
         } else {
             let TwoWeekDaysId = []
@@ -98,19 +106,20 @@
                     zeroPint = TwoWeekDaysId.indexOf(days[0])
                 if (i !== TwoWeekDaysId.indexOf(day)) included = false
             }
-            if (included)
-                output = [
+            if (included) {
+                output.days = [
                     `${napok[days[0] as keyof typeof napok]}-${napok[days[days.length - 1] as keyof typeof napok]}`,
                 ]
-            else {
-                return days
+                output.succes = true
+            } else {
+                output.succes = false
+                output.days = days
             }
         }
         return output
     }
     function plusTime() {
         index++
-        console.log('még jó')
         let newTime = document.createElement('input')
         newTime.type = 'time'
         newTime.classList.add(
@@ -144,9 +153,20 @@
 
         return null
     }
-    for (let i = 0; i < hangok.length; i++) {
-        hangok[i].days = checkDaysIfContanius(hangok[i].days, true)
+    function sortingWeekDays(a: string, b: string) {
+        if (Object.keys(napok).indexOf(a) < Object.keys(napok).indexOf(b)) {
+            return -1
+        } else if (
+            Object.keys(napok).indexOf(a) > Object.keys(napok).indexOf(b)
+        ) {
+            return 1
+        }
+        return 0
     }
+    for (let i = 0; i < hangok.length; i++) {
+        hangok[i].days.sort(sortingWeekDays)
+    }
+    console.log(hangok[1].days.sort(sortingWeekDays))
 </script>
 
 <div class="">
@@ -160,47 +180,53 @@
         </button>
         <div>
             <div
-                class="grid grid-cols-4 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
+                class="grid grid-cols-9 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
             >
                 <span
-                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    class="text-3xl text-gray-100 text col-span-2 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
                     >Hang</span
                 >
                 <span
-                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    class="text-3xl text-gray-100 text col-span-2 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
                     >Idő</span
                 >
                 <span
-                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    class="text-3xl text-gray-100 text col-span-2 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
                     >Nap(ok)</span
                 >
                 <span
-                    class="text-3xl text-gray-100 text font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
+                    class="text-3xl text-gray-100 text col-span-3 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
                     >Szerkesztés</span
                 >
             </div>
             {#each hangok as hang}
                 <div
-                    class="grid grid-cols-4 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
+                    class="grid grid-cols-9 bg-blue-900 rounded-xl w-11/12 m-auto my-5 p-3"
                 >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
+                        class="text-3xl text-gray-900 text col-span-2 font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
                         >{hang.location}</span
                     >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
+                        class="text-3xl text-gray-900 text font-bold col-span-2 text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
                         >{#each hang.dates as idő}
                             {idő}
                         {/each}</span
                     >
                     <span
-                        class="text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
-                        >{#each hang.days as nap}
-                            {nap}
-                        {/each}</span
+                        class="text-3xl text-gray-900 text font-bold col-span-2 text-center rounded-xl bg-blue-500 mx-3 outline outline-black"
                     >
+                        {#if checkDaysIfContanius(hang.days).succes}
+                            {checkDaysIfContanius(hang.days).days}
+                        {/if}
+                        {#if !checkDaysIfContanius(hang.days).succes}
+                            {#each hang.days as nap}
+                                {`${nap} `}
+                            {/each}
+                        {/if}
+                    </span>
                     <div
-                        class="items-center content-center justify-center text-center grid grid-cols-6 gap-2"
+                        class="  items-center col-span-3 text-center grid grid-cols-6 gap-1"
                     >
                         <button
                             class="col-span-2 p-1 text-3xl text-gray-900 text font-bold text-center rounded-xl bg-red-600 mx-2 outline outline-black hover:bg-red-900"
@@ -212,10 +238,11 @@
                             >Szerkeszt.</button
                         >
                         <button
-                            class="outline h-[46px] bg-green-600 outline-white rounded-xl"
+                            class="outline bg-green-600 outline-white rounded-xl text-3xl text-transparent mx-1"
                             id={`${hangok.indexOf(hang)}_mode`}
                             on:click={modeChanged(hangok.indexOf(hang))}
-                        ></button>
+                            >a
+                        </button>
                     </div>
                 </div>
             {/each}
