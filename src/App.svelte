@@ -1,28 +1,33 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import * as conf from './lib/config'
-    import type { Hangok } from './lib/types'
-    import {dayz} from "./lib/vars"
-    import { convertFileSrc } from '@tauri-apps/api/tauri'
-    let days = dayz
+    import type { Hangok, daysInterface } from './lib/types'
+    import { dayz } from './lib/vars'
+    let days: daysInterface[] = dayz.slice(0, dayz.length)
+
     let popUp: HTMLDivElement
     let bg: HTMLDivElement
     let timeDiv: HTMLDivElement
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
     let doneMode = -1
-    let musikurl = ""
+    let showing = false
 
     function cancel() {
         popUp?.classList.add('hidden')
         bg.classList.remove('opacity-40')
+        showing = false
         doneMode = -1
         timeBtnsJson = timeBtnsJson
         days = days
         hangok = hangok
     }
     function reset() {
-        days = dayz
+        days = dayz.slice(0, dayz.length)
+
+        console.log(dayz)
+        console.log(days)
+
         timeBtnsJson = [
             {
                 name: `time_1`,
@@ -44,7 +49,7 @@
         Szombat: 'szo',
         Vasárnap: 'va',
     }
-    
+
     let timeBtnsJson = [
         {
             name: `time_1`,
@@ -54,7 +59,7 @@
         },
     ]
     let index = 1
-    let hangok:Hangok[] = []
+    let hangok: Hangok[] = []
     async function load() {
         await conf.check()
         hangok = await conf.getHangok()
@@ -63,20 +68,23 @@
         load()
     })
 
-
     async function creating() {
         const path = await conf.addcsengő()
-        if(!path) return
+        if (!path) return
         pathText = path as string
+        showing = true
         popUp?.classList.remove('hidden')
         bg.classList.add('opacity-40')
         reset()
         timeBtnsJson = timeBtnsJson
-        days = days
+        days = dayz
+
         hangok = hangok
     }
 
     async function done() {
+        showing = false
+
         popUp?.classList.add('hidden')
         bg.classList.remove('opacity-40')
         let doneDays = []
@@ -116,11 +124,6 @@
             hangok[doneMode].dates = doneTimes
             hangok[doneMode].days = doneDays
         } else {
-            new Audio(pathText).play()
-            const assetUrl = convertFileSrc(pathText);
-            musikurl=assetUrl
-            console.log(assetUrl);
-            
             hangok.push({
                 location: pathText,
                 dates: doneTimes,
@@ -131,7 +134,7 @@
         }
         reset()
     }
-    let pathText = ""
+    let pathText = ''
     function checkDaysIfContanius(days: string[]) {
         interface outputInter {
             days: string[]
@@ -256,6 +259,7 @@
     function edit(index: number) {
         popUp?.classList.remove('hidden')
         bg.classList.add('opacity-40')
+        showing = true
 
         let current = hangok[index]
         for (let i = 0; i < days.length; i++) {
@@ -367,101 +371,101 @@
         </div>
     </div>
     <div
-    class="absolute hidden top-20 left-20 right-20 bottom-20 items-center content-center justify-center bg-slate-700 rounded-2xl"
-    bind:this={popUp}
+        class="absolute z-10 top-20 left-20 right-20 bottom-20 grid grid-cols-2 grid-rows-12 bg-slate-700 rounded-2xl"
+        bind:this={popUp}
     >
-    <h2 class="bg-blue-400 col-span-2 text-white font-bold text-center rounded-t-2xl" contenteditable="true" bind:innerText={pathText}>Cső</h2>
-    <div class="grid grid-cols-2 content-center gap-4 grid-rows-none snap-center h-full self-center justify-center align-middle items-center">
-            <div class="bg-blue-950 overflow-auto max-h-[60vh] ml-2 px-3 py-2 rounded-xl">
-                    <div
-                        class="text-center content-center overflow-auto grid max-h-max"
-                        bind:this={timeDiv}
-                    >
-                        <span
-                            class="bg-blue-700 text-white text-2xl  rounded-2xl my-2"
-                        >
-                            Idő
-                        </span>
-                        {#each timeBtnsJson as newTimeBtnJson}
-                            <div class="grid grid-cols-4 gap-3">
-                                <input
-                                    bind:value={newTimeBtnJson.value}
-                                    type="time"
-                                    name={newTimeBtnJson.name}
-                                    id={newTimeBtnJson.id}
-                                    class=" my-2 text-white text-center bg-blue-700 rounded-2xl text-2xl col-span-3"
-                                />
+        <h2
+            class="bg-blue-600 outline content-center translate-x-0 outline-white col-span-2 text-white font-bold text-center rounded-t-2xl row-span-1 h-8"
+            contenteditable="false"
+            bind:innerText={pathText}
+        >
+            pathText
+        </h2>
+        <div
+            class="row-span-10 grid grid-cols-2 col-span-3 content-center gap-4 snap-center h-full self-center justify-center align-middle items-center"
+        >
+            <div
+                class="text-center content-center overflow-auto grid bg-blue-950 max-h-[60vh] ml-2 px-3 py-2 rounded-xl"
+                bind:this={timeDiv}
+            >
+                <span class="bg-blue-700 text-white text-2xl rounded-2xl my-2">
+                    Idő
+                </span>
+                {#each timeBtnsJson as newTimeBtnJson}
+                    <div class="grid grid-cols-4 gap-3">
+                        <input
+                            bind:value={newTimeBtnJson.value}
+                            type="time"
+                            name={newTimeBtnJson.name}
+                            id={newTimeBtnJson.id}
+                            class=" my-2 text-white text-center bg-blue-700 rounded-2xl text-2xl col-span-3"
+                        />
 
-                                <button
-                                    class=" py-2 px-3 rounded-xl bg-red-700 text-white text-center hover:bg-red-800 my-2"
-                                    on:click={() =>
-                                        minusTime(newTimeBtnJson.id)}
-                                    id={newTimeBtnJson.delId}>-</button
-                                >
-                            </div>
-                        {/each}
                         <button
-                            class=" py-3 px-5 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800 my-2"
-                            on:click={() => plusTime()}
-                            bind:this={timeBtn}>+</button
+                            class=" py-2 px-3 rounded-xl bg-red-700 text-white text-center hover:bg-red-800 my-2"
+                            on:click={() => minusTime(newTimeBtnJson.id)}
+                            id={newTimeBtnJson.delId}>-</button
                         >
                     </div>
-                </div>
-                <div
-                    class="bg-blue-950 mr-2 px-3 py-2 rounded-xl h-[60vh] align-middle"
-                >
-                    <div
-                        class="text-center content-center grid h-full"
-                        bind:this={dayDiv}
-                    >
-                        <span
-                            class="bg-blue-700 text-white text-2xl rounded-2xl my-2"
-                        >
-                            Napok
-                        </span>
-                        {#each days as day}
-                            <div
-                                class="flex gap-2 bg-blue-700 rounded-xl my-2 group"
-                            >
-                                <input
-                                    type="checkbox"
-                                    bind:checked={day.check}
-                                    name={day.name}
-                                    id={day.name}
-                                    class=" translate-x-36 check group-active:chk peer cursor-pointer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
-                                />
-                                <label
-                                    for="H"
-                                    class="text-2xl text-white translate-x-36"
-                                    >{day.day}
-                                </label>
-                                <svg
-                                    class=" translate-x-36 absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                    stroke-Linecap="round"
-                                    stroke-Linejoin="round"
-                                >
-                                    <polyline points="20 6 9 17 4 12"
-                                    ></polyline>
-                                </svg>
-                            </div>
-                        {/each}
-                    </div>
-                </div>
+                {/each}
                 <button
-                    class="py-3 px-5 rounded-xl ml-2 font-bold text-2xl bg-red-700 text-white text-center hover:bg-red-800 transition-all duration-200"
-                    on:click={() => cancel()}>Mégse</button
-                >
-                <button
-                    class="py-3 px-5 rounded-xl mr-2 font-bold text-2xl bg-green-700 text-white text-center hover:bg-green-800 transition-all duration-200"
-                    on:click={() => done()}>Kész</button
+                    class=" py-3 px-5 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800 my-2"
+                    on:click={() => plusTime()}
+                    bind:this={timeBtn}>+</button
                 >
             </div>
-            
+
+            <div
+                class="text-center content-center grid bg-blue-950 px-3 py-2 rounded-xl h-[58vh] mr-2 overflow-auto"
+                bind:this={dayDiv}
+            >
+                <span class="bg-blue-700 text-white text-2xl rounded-2xl my-2">
+                    Napok
+                </span>
+                {#each days as day}
+                    <div
+                        class="flex gap-2 bg-blue-700 rounded-xl my-2 items-center"
+                    >
+                        <input
+                            type="checkbox"
+                            bind:checked={day.check}
+                            name={day.name}
+                            id={day.name}
+                            class=" translate-x-36 check group-active:chk peer cursor-pointer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
+                        />
+                        <label
+                            for="H"
+                            class="text-2xl text-white translate-x-36"
+                            >{day.day}
+                        </label>
+                        <svg
+                            class=" translate-x-36 absolute w-6 h-6 pointer-events-none hidden peer-checked:block stroke-white mt-1 outline-none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-Linecap="round"
+                            stroke-Linejoin="round"
+                        >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                {/each}
+            </div>
         </div>
 
+        <div
+            class="w-full row-span-1 grid grid-cols-2 gap-2 col-span-2 -translate-y-2"
+        >
+            <button
+                class="py-3 px-5 rounded-xl ml-2 font-bold text-2xl bg-red-700 text-white text-center hover:bg-red-800 transition-all duration-20"
+                on:click={() => cancel()}>Mégse</button
+            >
+            <button
+                class="py-3 px-5 rounded-xl mr-2 font-bold text-2xl bg-green-700 text-white text-center hover:bg-green-800 transition-all duration-200"
+                on:click={() => done()}>Kész</button
+            >
+        </div>
+    </div>
 </div>
