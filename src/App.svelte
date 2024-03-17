@@ -6,17 +6,68 @@
     let timeDiv: HTMLDivElement
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
+    let doneMode = -1
 
-    interface napokInter {
-        Hétfő: string
-        Kedd: string
-        Szerda: string
-        Csütörtök: string
-        Péntek: string
-        Szombat: string
-        Vasárnap: string
+    function cancel() {
+        popUp?.classList.add('hidden')
+        popUp?.classList.remove('flex')
+        bg.classList.remove('opacity-40')
+        doneMode = -1
+        timeBtnsJson = timeBtnsJson
+        days = days
+        hangok = hangok
     }
-    let napok: napokInter = {
+    function reset() {
+        days = [
+            {
+                day: 'Hétfő',
+                name: 'hé',
+                check: false,
+            },
+            {
+                day: 'Kedd',
+                name: 'ke',
+                check: false,
+            },
+            {
+                day: 'Szerda',
+                name: 'sze',
+                check: false,
+            },
+            {
+                day: 'Csütörtök',
+                name: 'csü',
+                check: false,
+            },
+            {
+                day: 'Péntek',
+                name: 'pé',
+                check: false,
+            },
+            {
+                day: 'Szombat',
+                name: 'szo',
+                check: false,
+            },
+            {
+                day: 'Vasárnap',
+                name: 'va',
+                check: false,
+            },
+        ]
+        timeBtnsJson = [
+            {
+                name: `time_1`,
+                id: `time_1`,
+                delId: `minus_time_1`,
+                value: '',
+            },
+        ]
+        index = 1
+        doneMode = -1
+    }
+
+    let napok = {
         Hétfő: 'hé',
         Kedd: 'ke',
         Szerda: 'sze',
@@ -29,30 +80,37 @@
         {
             day: 'Hétfő',
             name: 'hé',
+            check: false,
         },
         {
             day: 'Kedd',
             name: 'ke',
+            check: false,
         },
         {
             day: 'Szerda',
             name: 'sze',
+            check: false,
         },
         {
             day: 'Csütörtök',
             name: 'csü',
+            check: false,
         },
         {
             day: 'Péntek',
             name: 'pé',
+            check: false,
         },
         {
             day: 'Szombat',
             name: 'szo',
+            check: false,
         },
         {
             day: 'Vasárnap',
             name: 'va',
+            check: false,
         },
     ]
     let timeBtnsJson = [
@@ -60,42 +118,86 @@
             name: `time_1`,
             id: `time_1`,
             delId: `minus_time_1`,
+            value: '',
         },
     ]
-
+    let index = 1
     let hangok = [
         {
             location: 'C:\\Jan\\ki.mp3',
-            dates: ['8:35', '7:40'],
+            dates: ['08:35', '07:40'],
             days: ['Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
             mode: true,
         },
         {
             location: 'C:\\Jan\\be.mp3',
-            dates: ['8:30', '7:40'],
+            dates: ['08:30', '07:40'],
             days: ['Szombat', 'Péntek', 'Csütörtök', 'Vasárnap', 'Hétfő'],
             mode: true,
         },
     ]
 
-    let index = 1
     function creating() {
         // conf.addcsengő()
         popUp?.classList.remove('hidden')
         popUp?.classList.add('flex')
         bg.classList.add('opacity-40')
+        reset()
+        timeBtnsJson = timeBtnsJson
+        days = days
+        hangok = hangok
     }
+
     function done() {
         popUp?.classList.add('hidden')
         popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
-        timeBtnsJson = [
-            {
-                name: `time_1`,
-                id: `time_1`,
-                delId: `minus_time_1`,
-            },
-        ]
+        let doneDays = []
+        let doneTimes = []
+        for (let i = 0; i < days.length; i++) {
+            const element = days[i]
+            if (element.check) doneDays.push(element.day)
+        }
+        for (let i = 0; i < timeBtnsJson.length; i++) {
+            const element = timeBtnsJson[i]
+            doneTimes.push(element.value)
+        }
+
+        doneTimes.sort((a, b) => {
+            let aTime = new Date(`1970-01-01T${a}:00Z`)
+            let bTime = new Date(`1970-01-01T${b}:00Z`)
+            return (aTime as any) - (bTime as any)
+        })
+        let counter = 0
+        for (let i = 0; i < doneTimes.length; i++) {
+            const element = doneTimes[i]
+            if (element == '') {
+                counter++
+            }
+        }
+        if (counter == doneTimes.length && doneDays.length == 0) {
+            reset()
+            return
+        }
+        if (doneDays.length == 0) {
+            doneDays = ['Nem adtad meg']
+        }
+        if (counter == doneTimes.length) {
+            doneTimes = ['Nem adtad meg']
+        }
+        if (doneMode != -1) {
+            hangok[doneMode].dates = doneTimes
+            hangok[doneMode].days = doneDays
+        } else {
+            hangok.push({
+                location: 'Majd valami lesz',
+                dates: doneTimes,
+                days: doneDays,
+                mode: true,
+            })
+            hangok = hangok
+        }
+        reset()
     }
     function checkDaysIfContanius(days: string[]) {
         interface outputInter {
@@ -103,6 +205,9 @@
             succes: boolean
         }
         let output: outputInter = { days: days, succes: false }
+        if (days.length == 1) {
+            return output
+        }
         let mode = false
         if (days[0].length > 3) mode = true
         if (mode) {
@@ -168,6 +273,7 @@
             name: `time_${index}`,
             id: `time_${index}`,
             delId: `minus_time_${index}`,
+            value: '',
         }
         timeBtnsJson.push(newTime)
         timeBtnsJson = timeBtnsJson
@@ -177,7 +283,7 @@
             return element.id === id
         })
         if (wanted) {
-            timeBtnsJson.splice(timeBtnsJson.indexOf(wanted) - 1, 1)
+            timeBtnsJson.splice(timeBtnsJson.indexOf(wanted), 1)
         }
 
         timeBtnsJson = timeBtnsJson
@@ -207,13 +313,50 @@
     for (let i = 0; i < hangok.length; i++) {
         hangok[i].days.sort(sortingWeekDays)
     }
+    for (let i = 0; i < hangok.length; i++) {
+        hangok[i].dates.sort((a, b) => {
+            let aTime = new Date(`1970-01-01T${a}:00Z`)
+            let bTime = new Date(`1970-01-01T${b}:00Z`)
+            return (aTime as any) - (bTime as any)
+        })
+    }
+    function edit(index: number) {
+        popUp?.classList.remove('hidden')
+        popUp?.classList.add('flex')
+        bg.classList.add('opacity-40')
+
+        let current = hangok[index]
+        for (let i = 0; i < days.length; i++) {
+            if (current.days.includes(days[i].day)) {
+                days[i].check = true
+            } else {
+                days[i].check = false
+            }
+        }
+        timeBtnsJson = []
+        for (let i = 0; i < current.dates.length; i++) {
+            const element = current.dates[i]
+            timeBtnsJson.push({
+                name: `time_${i}`,
+                id: `time_${i}`,
+                delId: `minus_time_${i}`,
+                value: element,
+            })
+        }
+
+        doneMode = index
+    }
+    function delChime(index: number) {
+        hangok.splice(index, 1)
+        hangok = hangok
+    }
 </script>
 
 <div class="">
     <div bind:this={bg}>
         <button
             id="plus"
-            class="rounded-full bg-blue-700 hover:bg-blue-800 w-24 h-24 fixed text-center text-white bottom-2 left-2"
+            class=" bg-blue-700 hover:bg-blue-800 w-24 h-24 rounded-full fixed text-center text-3xl text-white bottom-2 left-2"
             on:click={() => creating()}
         >
             +
@@ -270,11 +413,14 @@
                     >
                         <button
                             class="col-span-2 p-1 text-3xl text-gray-900 text font-bold text-center rounded-xl bg-red-600 mx-2 outline outline-black hover:bg-red-900"
-                            id={`${hangok.indexOf(hang)}_del`}>Törlés</button
+                            id={`${hangok.indexOf(hang)}_del`}
+                            on:click={() => delChime(hangok.indexOf(hang))}
+                            >Törlés</button
                         >
                         <button
                             class="col-span-3 p-1 text-3xl text-gray-900 text font-bold text-center rounded-xl bg-blue-500 outline outline-black hover:bg-blue-800"
                             id={`${hangok.indexOf(hang)}_edit`}
+                            on:click={() => edit(hangok.indexOf(hang))}
                             >Szerkeszt.</button
                         >
                         <button
@@ -310,11 +456,13 @@
                         {#each timeBtnsJson as newTimeBtnJson}
                             <div class="grid grid-cols-4 gap-3">
                                 <input
+                                    bind:value={newTimeBtnJson.value}
                                     type="time"
                                     name={newTimeBtnJson.name}
                                     id={newTimeBtnJson.id}
                                     class=" my-2 text-white text-center bg-blue-700 rounded-2xl text-2xl col-span-3"
                                 />
+
                                 <button
                                     class=" py-2 px-3 rounded-xl bg-red-700 text-white text-center hover:bg-red-800 my-2"
                                     on:click={() =>
@@ -331,7 +479,7 @@
                     </div>
                 </div>
                 <div
-                    class="bg-blue-950 absolute top-2 right-40 w-96 px-3 py-2 rounded-xl"
+                    class="bg-blue-950 absolute top-2 right-56 w-96 px-3 py-2 rounded-xl"
                 >
                     <div
                         class="text-center content-center grid"
@@ -348,7 +496,7 @@
                             >
                                 <input
                                     type="checkbox"
-                                    checked={false}
+                                    bind:checked={day.check}
                                     name={day.name}
                                     id={day.name}
                                     class=" translate-x-36 check group-active:chk peer cursor-pointer appearance-none relative w-6 h-6 border-2 border-slate-300 checked:bg-slate-700 checked:border-white rounded-lg mt-1 shrink-0"
@@ -377,6 +525,10 @@
                 </div>
             </div>
 
+            <button
+                class="absolute py-3 px-5 bottom-5 right-28 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800"
+                on:click={() => cancel()}>Mégse</button
+            >
             <button
                 class="absolute py-3 px-5 bottom-5 right-5 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800"
                 on:click={() => done()}>Kész</button
