@@ -1,16 +1,20 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import * as conf from './lib/config'
-
+    import type { Hangok } from './lib/types'
+    import {dayz} from "./lib/vars"
+    import { convertFileSrc } from '@tauri-apps/api/tauri'
+    let days = dayz
     let popUp: HTMLDivElement
     let bg: HTMLDivElement
     let timeDiv: HTMLDivElement
     let dayDiv: HTMLDivElement
     let timeBtn: HTMLButtonElement
     let doneMode = -1
+    let musikurl = ""
 
     function cancel() {
         popUp?.classList.add('hidden')
-        popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
         doneMode = -1
         timeBtnsJson = timeBtnsJson
@@ -18,43 +22,7 @@
         hangok = hangok
     }
     function reset() {
-        days = [
-            {
-                day: 'Hétfő',
-                name: 'hé',
-                check: false,
-            },
-            {
-                day: 'Kedd',
-                name: 'ke',
-                check: false,
-            },
-            {
-                day: 'Szerda',
-                name: 'sze',
-                check: false,
-            },
-            {
-                day: 'Csütörtök',
-                name: 'csü',
-                check: false,
-            },
-            {
-                day: 'Péntek',
-                name: 'pé',
-                check: false,
-            },
-            {
-                day: 'Szombat',
-                name: 'szo',
-                check: false,
-            },
-            {
-                day: 'Vasárnap',
-                name: 'va',
-                check: false,
-            },
-        ]
+        days = dayz
         timeBtnsJson = [
             {
                 name: `time_1`,
@@ -76,43 +44,7 @@
         Szombat: 'szo',
         Vasárnap: 'va',
     }
-    let days = [
-        {
-            day: 'Hétfő',
-            name: 'hé',
-            check: false,
-        },
-        {
-            day: 'Kedd',
-            name: 'ke',
-            check: false,
-        },
-        {
-            day: 'Szerda',
-            name: 'sze',
-            check: false,
-        },
-        {
-            day: 'Csütörtök',
-            name: 'csü',
-            check: false,
-        },
-        {
-            day: 'Péntek',
-            name: 'pé',
-            check: false,
-        },
-        {
-            day: 'Szombat',
-            name: 'szo',
-            check: false,
-        },
-        {
-            day: 'Vasárnap',
-            name: 'va',
-            check: false,
-        },
-    ]
+    
     let timeBtnsJson = [
         {
             name: `time_1`,
@@ -122,25 +54,21 @@
         },
     ]
     let index = 1
-    let hangok = [
-        {
-            location: 'C:\\Jan\\ki.mp3',
-            dates: ['08:35', '07:40'],
-            days: ['Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
-            mode: true,
-        },
-        {
-            location: 'C:\\Jan\\be.mp3',
-            dates: ['08:30', '07:40'],
-            days: ['Szombat', 'Péntek', 'Csütörtök', 'Vasárnap', 'Hétfő'],
-            mode: true,
-        },
-    ]
+    let hangok:Hangok[] = []
+    async function load() {
+        await conf.check()
+        hangok = await conf.getHangok()
+    }
+    onMount(() => {
+        load()
+    })
 
-    function creating() {
-        // conf.addcsengő()
+
+    async function creating() {
+        const path = await conf.addcsengő()
+        if(!path) return
+        pathText = path as string
         popUp?.classList.remove('hidden')
-        popUp?.classList.add('flex')
         bg.classList.add('opacity-40')
         reset()
         timeBtnsJson = timeBtnsJson
@@ -148,9 +76,8 @@
         hangok = hangok
     }
 
-    function done() {
+    async function done() {
         popUp?.classList.add('hidden')
-        popUp?.classList.remove('flex')
         bg.classList.remove('opacity-40')
         let doneDays = []
         let doneTimes = []
@@ -189,8 +116,13 @@
             hangok[doneMode].dates = doneTimes
             hangok[doneMode].days = doneDays
         } else {
+            new Audio(pathText).play()
+            const assetUrl = convertFileSrc(pathText);
+            musikurl=assetUrl
+            console.log(assetUrl);
+            
             hangok.push({
-                location: 'Majd valami lesz',
+                location: pathText,
                 dates: doneTimes,
                 days: doneDays,
                 mode: true,
@@ -199,6 +131,7 @@
         }
         reset()
     }
+    let pathText = ""
     function checkDaysIfContanius(days: string[]) {
         interface outputInter {
             days: string[]
@@ -322,7 +255,6 @@
     }
     function edit(index: number) {
         popUp?.classList.remove('hidden')
-        popUp?.classList.add('flex')
         bg.classList.add('opacity-40')
 
         let current = hangok[index]
@@ -375,7 +307,7 @@
                 >
                 <span
                     class="text-3xl text-gray-100 text col-span-2 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
-                    >Nap(ok)</span
+                    >Napok</span
                 >
                 <span
                     class="text-3xl text-gray-100 text col-span-3 font-bold text-center rounded-xl bg-blue-800 mx-3 outline outline-white"
@@ -434,22 +366,19 @@
             {/each}
         </div>
     </div>
-
     <div
-        class=" hidden items-center justify-center h-screen w-screen m-auto z-10 fixed top-0 overflow-auto"
-        bind:this={popUp}
+    class="absolute hidden top-20 left-20 right-20 bottom-20 items-center content-center justify-center bg-slate-700 rounded-2xl"
+    bind:this={popUp}
     >
-        <div
-            class="z-10 bg-slate-700 w-5/6 h-auto relative rounded-2xl min-h-[420px]"
-        >
-            <div class="grid grid-cols-2 grid-rows-1 content-start my-2 mx-2">
-                <div class="bg-blue-950 top-2 px-3 rounded-xl py-2 w-96">
+    <h2 class="bg-blue-400 col-span-2 text-white font-bold text-center rounded-t-2xl" contenteditable="true" bind:innerText={pathText}>Cső</h2>
+    <div class="grid grid-cols-2 content-center gap-4 grid-rows-none snap-center h-full self-center justify-center align-middle items-center">
+            <div class="bg-blue-950 overflow-auto max-h-[60vh] ml-2 px-3 py-2 rounded-xl">
                     <div
-                        class="text-center content-center grid"
+                        class="text-center content-center overflow-auto grid max-h-max"
                         bind:this={timeDiv}
                     >
                         <span
-                            class="bg-blue-700 text-white text-2xl rounded-2xl my-2"
+                            class="bg-blue-700 text-white text-2xl  rounded-2xl my-2"
                         >
                             Idő
                         </span>
@@ -479,16 +408,16 @@
                     </div>
                 </div>
                 <div
-                    class="bg-blue-950 absolute top-2 right-56 w-96 px-3 py-2 rounded-xl"
+                    class="bg-blue-950 mr-2 px-3 py-2 rounded-xl h-[60vh] align-middle"
                 >
                     <div
-                        class="text-center content-center grid"
+                        class="text-center content-center grid h-full"
                         bind:this={dayDiv}
                     >
                         <span
                             class="bg-blue-700 text-white text-2xl rounded-2xl my-2"
                         >
-                            Nap(ok)
+                            Napok
                         </span>
                         {#each days as day}
                             <div
@@ -523,16 +452,16 @@
                         {/each}
                     </div>
                 </div>
+                <button
+                    class="py-3 px-5 rounded-xl ml-2 font-bold text-2xl bg-red-700 text-white text-center hover:bg-red-800 transition-all duration-200"
+                    on:click={() => cancel()}>Mégse</button
+                >
+                <button
+                    class="py-3 px-5 rounded-xl mr-2 font-bold text-2xl bg-green-700 text-white text-center hover:bg-green-800 transition-all duration-200"
+                    on:click={() => done()}>Kész</button
+                >
             </div>
-
-            <button
-                class="absolute py-3 px-5 bottom-5 right-28 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800"
-                on:click={() => cancel()}>Mégse</button
-            >
-            <button
-                class="absolute py-3 px-5 bottom-5 right-5 rounded-xl bg-blue-700 text-white text-center hover:bg-blue-800"
-                on:click={() => done()}>Kész</button
-            >
+            
         </div>
-    </div>
+
 </div>

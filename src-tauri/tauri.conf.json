@@ -40,7 +40,7 @@
                 "removeDir": true,
                 "removeFile": true,
                 "renameFile": true,
-                "scope": ["$APPCONFIG", "$DOWNLOAD/*"],
+                "scope": ["$APPCONFIG", "$DOWNLOAD/*", "$APPCONFIG/*"],
                 "writeFile": true
             },
             "globalShortcut": {
@@ -67,9 +67,9 @@
                 "relaunchDangerousAllowSymlinkMacos": false
             },
             "protocol": {
-                "all": false,
-                "asset": false,
-                "assetScope": []
+                "all": true,
+                "asset": true,
+                "assetScope": ["**"]
             },
             "shell": {
                 "all": false,
@@ -123,7 +123,7 @@
             }
         ],
         "security": {
-            "csp": null
+            "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost"
         },
         "bundle": {
             "active": true,
